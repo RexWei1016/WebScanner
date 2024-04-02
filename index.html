@@ -19,14 +19,36 @@
         }
 
         docReady(function () {
-            var html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-            
-            function onScanSuccess(decodedText, decodedResult) {
-                document.getElementById('qr-reader-results').innerHTML = decodedText;
-                html5QrcodeScanner.clear();
-            }
-            
-            html5QrcodeScanner.render(onScanSuccess);
+            var html5QrCode = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.7777778 };
+            Html5Qrcode.getCameras().then(devices => {
+                /**
+                 * devices would be an array of objects of type:
+                 * { id: "id", label: "label" }
+                 */
+                if (devices && devices.length) {
+                    var cameraId = devices[0].id;
+                    // .. use this to start scanning.
+                    html5QrCode.start(
+                        cameraId, 
+                        config,
+                        (decodedText, decodedResult) => {
+                            // do something when code is read
+                            document.getElementById('qr-reader-results').innerHTML = decodedText;
+                        },
+                        (errorMessage) => {
+                            // parse error, ideally ignore it. For example:
+                            console.log(`QR Code no longer in front of camera.`);
+                        })
+                        .catch((err) => {
+                            // Start failed, handle it. For example,
+                            console.log(`Unable to start scanning, error: ${err}`);
+                        });
+                }
+            }).catch((err) => {
+                // handle err
+                console.log(`Error getting camera devices: ${err}`);
+            });
         });
     </script>
 </body>
