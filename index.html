@@ -19,35 +19,27 @@
         }
 
         docReady(function () {
-            var html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.7777778 };
-            Html5Qrcode.getCameras().then(devices => {
-                /**
-                 * devices would be an array of objects of type:
-                 * { id: "id", label: "label" }
-                 */
-                if (devices && devices.length) {
-                    var cameraId = devices[0].id;
-                    // .. use this to start scanning.
-                    html5QrCode.start(
-                        cameraId, 
-                        config,
-                        (decodedText, decodedResult) => {
-                            // do something when code is read
-                            document.getElementById('qr-reader-results').innerHTML = decodedText;
-                        },
-                        (errorMessage) => {
-                            // parse error, ideally ignore it. For example:
-                            console.log(`QR Code no longer in front of camera.`);
-                        })
-                        .catch((err) => {
-                            // Start failed, handle it. For example,
-                            console.log(`Unable to start scanning, error: ${err}`);
-                        });
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 }, 
+                aspectRatio: 1.7777778,
+                facingMode: "environment" // 使用後置鏡頭
+            };
+            html5QrCode.start(
+                { facingMode: "environment" }, // 優先使用後置鏡頭
+                config,
+                (decodedText, decodedResult) => {
+                    // 掃描成功時的回調函數
+                    document.getElementById('qr-reader-results').innerHTML = decodedText;
+                },
+                errorMessage => {
+                    // 掃描過程中的錯誤回調
+                    console.log(`QR Code no longer in front of camera.`);
                 }
-            }).catch((err) => {
-                // handle err
-                console.log(`Error getting camera devices: ${err}`);
+            ).catch(err => {
+                // 啟動掃描失敗時的錯誤處理
+                console.error(`Unable to start scanning, error: ${err}`);
             });
         });
     </script>
