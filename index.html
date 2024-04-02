@@ -6,20 +6,23 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        #qr-reader { 
-            height: 300px; /* 設置固定高度以適應大多數螢幕 */
+        .qr-reader-container {
+            padding: 0; /* 移除內邊距以防止內容被擠壓 */
         }
-        #qr-reader-results, #qr-reader-errors {
-            font-size: 20px; /* 增大字體大小以提高可讀性 */
-            word-break: break-all; /* 確保長文字不會溢出容器 */
+        #qr-reader {
+            width: 100%; /* 保證解碼框在容器內全寬顯示 */
+            min-height: 300px; /* 設置最小高度以保證解碼框在移動設備上的可見性 */
+        }
+        .alert {
+            word-break: break-word; /* 確保長文本在容器內自動換行 */
         }
     </style>
 </head>
 <body>
-<div class="container mt-5">
+<div class="container">
     <div class="row">
-        <div class="col-12 col-md-8 offset-md-2">
-            <div id="qr-reader"></div>
+        <div class="col-12">
+            <div id="qr-reader" class="qr-reader-container"></div>
             <div id="qr-reader-results" class="alert alert-success mt-3 text-center" style="display: none;"></div>
             <div id="qr-reader-errors" class="alert alert-danger mt-3 text-center" style="display: none;"></div>
         </div>
@@ -39,7 +42,11 @@
         const html5QrCode = new Html5Qrcode("qr-reader");
         const config = {
             fps: 10,
-            qrbox: { width: 250, height: 250 }, // 使用物件配置來設置固定尺寸
+            qrbox: (width, height) => {
+                // 設置qrbox為容器寬度的80%，高度自適應
+                const side = Math.min(width, height) * 0.95;
+                return { width: side, height: side };
+            },
             aspectRatio: 1.7777778,
             facingMode: "environment"
         };
