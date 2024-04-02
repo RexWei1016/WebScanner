@@ -4,44 +4,65 @@
     <meta charset="UTF-8">
     <title>QR Code 掃描器</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .qr-reader-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .qr-box {
+            width: 100%;
+            height: auto;
+            padding-bottom: 75%; /* 這會根據容器寬度，保持解碼框的高度 */
+        }
+        #qr-reader { position: relative; width: 100%; height: 100%; }
+    </style>
 </head>
 <body>
-    <div id="qr-reader" style="width: 500px; height: 500px;"></div>
-    <div id="qr-reader-results"></div>
-    
-    <script>
-        function docReady(fn) {
-            if (document.readyState === "complete" || document.readyState === "interactive") {
-                setTimeout(fn, 1);
-            } else {
-                document.addEventListener("DOMContentLoaded", fn);
-            }
-        }
+<div class="container mt-5 qr-reader-container">
+    <div class="qr-box">
+        <div id="qr-reader"></div>
+    </div>
+    <div id="qr-reader-results" class="alert alert-success mt-3 text-center" style="font-size: 20px;"></div>
+    <div id="qr-reader-errors" class="alert alert-danger mt-3 text-center" style="display: none; font-size: 20px;"></div>
+</div>
 
-        docReady(function () {
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 }, 
-                aspectRatio: 1.7777778,
-                facingMode: "environment" // 使用後置鏡頭
-            };
-            html5QrCode.start(
-                { facingMode: "environment" }, // 優先使用後置鏡頭
-                config,
-                (decodedText, decodedResult) => {
-                    // 掃描成功時的回調函數
-                    document.getElementById('qr-reader-results').innerHTML = decodedText;
-                },
-                errorMessage => {
-                    // 掃描過程中的錯誤回調
-                    console.log(`QR Code no longer in front of camera.`);
-                }
-            ).catch(err => {
-                // 啟動掃描失敗時的錯誤處理
-                console.error(`Unable to start scanning, error: ${err}`);
-            });
+<script>
+    function docReady(fn) {
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    docReady(function () {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        const config = {
+            fps: 10,
+            qrbox: 250, // 解碼框尺寸
+            aspectRatio: 1.7777778,
+            facingMode: "environment" // 使用後置攝像頭
+        };
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
+                // 掃描成功時的回調函數
+                document.getElementById('qr-reader-results').innerHTML = `掃描結果: ${decodedText}`;
+                document.getElementById('qr-reader-errors').style.display = 'none';
+            },
+            (errorMessage) => {
+                // 掃描過程中的錯誤回調
+                document.getElementById('qr-reader-errors').style.display = 'block';
+                document.getElementById('qr-reader-errors').innerHTML = `錯誤信息: ${errorMessage}`;
+            }
+        ).catch(err => {
+            // 啟動掃描失敗時的錯誤處理
+            document.getElementById('qr-reader-errors').style.display = 'block';
+            document.getElementById('qr-reader-errors').innerHTML = `無法開始掃描, 錯誤: ${err}`;
         });
-    </script>
+    });
+</script>
 </body>
 </html>
